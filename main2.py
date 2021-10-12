@@ -3,7 +3,7 @@ import math
 import os
 import json
 import PySide6
-from PySide6.QtWidgets import (QApplication, QGraphicsLineItem, QMainWindow, QMessageBox, QToolBox, QHBoxLayout, QGraphicsView,
+from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsLineItem, QGraphicsTextItem, QMainWindow, QMessageBox, QToolBox, QHBoxLayout, QGraphicsView,
                                QGraphicsScene, QWidget, QToolButton, QComboBox, QFormLayout, QLabel, QButtonGroup,
                                QVBoxLayout, )
 from PySide6.QtGui import (QPen, QPolygonF, QAction, QIcon,)
@@ -14,45 +14,61 @@ from PySide6.QtCore import (QRectF, Qt, QLineF)
 class Arrow():
     pass
 
-class DiagramItem():
-    def __init__(self, text) -> None:
-        pass
+class DiagramItem(QGraphicsTextItem):
+    def __init__(self, text, parent=None, scene=None) -> None:
+        super(DiagramItem, self).__init__(parent, scene)
+
+        self.setFlag(QGraphicsItem.ItemIsMovable)  # 可以移动
+        self.setFlag(QGraphicsItem.ItemIsSelectable)  # 可以选中
+
+        self.setPlainText(text)
+
+    
+    
 
 class DiagramScene(QGraphicsScene):
     # TODO：设置item的Z轴1000，line的Z轴-1000
     # TODO: 双击更改item名字
-    # TODO: self.line.setPen
-    def __init__(self):
-        super(DiagramScene, self).__init__()
+    # TODO: 删除选中item
+    # TODO：添加item后取消button选中
+    def __init__(self, parent):
+        super().__init__()
         self.item_mode = None # 'str' , None
         self.pointer_mode = None  # 'pointer', 'line'
         self.line = None
+        self.parent = parent
+        self.in_arrows = []
+        self.out_arrows = []
+        self.propertys = {}
 
     def mousePressEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         if event.button() != Qt.LeftButton:  # 只响应左键
             return
 
-        # 摁下左键：添加item 或 添加line
-        if self.mode == 'insert_item':  # 添加item
-            item = DiagramItem()
+        # 摁下左键：添加item 或 添加line 或 无动作
+        if self.item_mode and self.pointer_mode == 'pointer':  # 添加item
+            item = DiagramItem(self.item_mode)
             item.setPos(event.scenePos())
             self.addItem(item)
-        elif self.mode == 'insert_line':  # 添加line
+
+        elif self.pointer_mode == 'line':  # 添加line
             self.line = QGraphicsLineItem(QLineF(event.scenePos(), event.scenePos()))
-            self.line.setPen(QPen(Qt.black, 2))
+            # self.line.setPen(QPen(Qt.black, 2))
             self.addItem(self.line)
 
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
-        if self.mode == 'insert_line' and self.line:
-            line = QLineF(self.line().p1(), event.scenePos())
+        # 移动item 或者 移动line 或者无动作
+        if self.pointer_mode == 'line' and self.line: # 移动line
+            line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(line)
-        elif self.mode == 'move_item':
-            super(self).mouseMoveEvent(event)
+        elif self.pointer_mode == 'pointer' and self.item_mode == None:  # 移动item
+            super(DiagramScene, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
-        if self.line and self.mode == 'insert_line':
+        # 如果当前正在连线则取消
+        if self.line:
             # 获得line起点与终点的第一个不是line的item
             start_items = self.items(self.line.line().p1())
             while len(start_items) and start_items[0] == self.line:
@@ -66,9 +82,9 @@ class DiagramScene(QGraphicsScene):
             self.line = None
 
             if (len(start_items) and len(end_items)) and (start_items[0] != end_items[0]):
-                arrow = Arrow(start_items[0], end_items[0])
-                self.addItem(arrow)
-
+                # arrow = Arrow(start_items[0], end_items[0])
+                # self.addItem(arrow)
+                print('arrow added')
 
 
         super().mouseReleaseEvent(event)
@@ -82,12 +98,11 @@ class MainWindow(QMainWindow):
         # 初始化
         self.init_action()
         self.init_menu()
+        self.init_view()
         self.init_toolbar()
         self.init_tool_box()
-        self.init_view()
         self.init_property_box()
         self.init_layout()
-
 
     def init_layout(self):
         layout = QHBoxLayout()
@@ -113,12 +128,7 @@ class MainWindow(QMainWindow):
 
     def init_toolbar(self):
         def pointer_clicked(i):
-            # i: 0选择指针图标，1选择连线图标
-            # print(self.toolbar_button_group.checkedId())
-            # print(i)
-            print(self.toolbar_button_group.checkedButton().text())
-            if self.toolbar_button_group.checkedButton().text() == 'line':
-                self.view.scene().pointer_mode = 'line'
+            self.scene.pointer_mode = self.toolbar_button_group.checkedButton().text()
 
         def scene_scale_changed(scale):
             # 视图大小改变
@@ -140,6 +150,7 @@ class MainWindow(QMainWindow):
         pointer_button.setText('pointer')
         pointer_button.setCheckable(True)
         pointer_button.setChecked(True)
+        self.scene.pointer_mode = 'pointer'
         pointer_button.setIcon(QIcon(os.path.join('images', 'pointer.png')))
 
         # 连线图标
@@ -224,7 +235,7 @@ class MainWindow(QMainWindow):
 
     def init_view(self):
         # 初始化视图
-        self.scene = DiagramScene()
+        self.scene = DiagramScene(self)
         self.scene.setSceneRect(QRectF(0, 0, 5000, 5000))
         
         self.view = QGraphicsView(self.scene)
@@ -254,7 +265,11 @@ class MainWindow(QMainWindow):
         QMessageBox.about(self, 'About action', 'test message.')
 
     def delete(self):
-        pass
+        for item in self.scene.selectedItems():
+            if isinstance(item, DiagramItem):
+                # item.remove_arrows()
+                print('请删除item关联的arrows')
+            self.scene.removeItem(item)
 
     def exit(self):
         pass
