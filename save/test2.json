@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "train": true,
+  "main": {
+    "optimizer": {
+      "func": "SGD",
+      "lr": "0.003"
+    },
+    "hyperparameters": {
+      "epoch": "30",
+      "batch_size": "5",
+      "shuffle": true,
+      "seed": "1",
+      "gpu": false
+    },
+    "loss": {
+      "loss_func": {
+        "func": "MSELoss"
+      },
+      "models": [
+        {
+          "x": {"func": "cat", "tensors": [
+            {"func": "get_boston_CRIM"},
+            {"func": "get_boston_ZN"},
+            {"func": "get_boston_INDUS"},
+            {"func": "get_boston_CHAS"},
+            {"func": "get_boston_NOX"},
+            {"func": "get_boston_RM"},
+            {"func": "get_boston_AGE"},
+            {"func": "get_boston_DIS"},
+            {"func": "get_boston_RAD"},
+            {"func": "get_boston_TAX"},
+            {"func": "get_boston_PTRATIO"},
+            {"func": "get_boston_B"},
+            {"func": "get_boston_LSTAT"}
+          ]},
+          "model": [
+            {"func": "Linear", "in_features": "13", "out_features": "10"},
+            {"func": "ReLU"},
+            {"func": "Linear", "in_features": "10", "out_features": "10"},
+            {"func": "ReLU"},
+            {"func": "Linear", "in_features": "10", "out_features": "1"}
+          ]
+        }
+      ],
+      "y": {"func": "get_boston_PRICE"}
+    }
+  }
+}
