@@ -2,6 +2,7 @@ import sys
 import math
 import os
 import json
+from typing import Any, Optional
 import PySide6
 from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsLineItem, QGraphicsTextItem, QMainWindow, QMessageBox, QToolBox, QHBoxLayout, QGraphicsView,
                                QGraphicsScene, QWidget, QToolButton, QComboBox, QFormLayout, QLabel, QButtonGroup,
@@ -11,32 +12,106 @@ from PySide6.QtCore import (QRectF, Qt, QLineF)
 
 
 
-class Arrow():
-    pass
+class Arrow(QGraphicsLineItem):
+    def __init__(self, start_item, end_item, parent=None, scene=None) -> None:
+        super().__init__(parent, scene)
+        self.start_item = start_item
+        self.end_item = end_item
+
+    def boundingRect(self) -> PySide6.QtCore.QRectF:
+        # 由于箭头比直线大，重新计算graphics scene 需要刷新的范围
+        return super().boundingRect()
+
+    def shape(self) -> PySide6.QtGui.QPainterPath:
+        # 用于检查鼠标碰撞和选择
+        return super().shape()
+
+    def update_position(self):
+        # 当start_item 与 end_item 移动时更新箭头
+        pass 
+
+    def paint(self, painter: PySide6.QtGui.QPainter, option: PySide6.QtWidgets.QStyleOptionGraphicsItem, widget: Optional[PySide6.QtWidgets.QWidget] = ...) -> None:
+        # 绘制直线和箭头
+        return super().paint(painter, option, widget=widget)
+
+
 
 class DiagramItem(QGraphicsTextItem):
-    def __init__(self, text, parent=None, scene=None) -> None:
-        super(DiagramItem, self).__init__(parent, scene)
+    def __init__(self, text, kwargs, pos, parent) -> None:
+        super(DiagramItem, self).__init__()
 
+        self.setPos(pos)
+        self.setParent(parent)
         self.setFlag(QGraphicsItem.ItemIsMovable)  # 可以移动
         self.setFlag(QGraphicsItem.ItemIsSelectable)  # 可以选中
 
         self.setPlainText(text)
+        self.kwargs = kwargs
+        # self.parent_ = parent
+        self.in_arrows = []
+        self.out_arrows = []
 
-    
-    
+    def show_property(self):
+        property_box: QWidget = self.parent().parent().property_box
+        property_layout = property_box.layout()
+        
+        # 清空布局
+        while property_layout.rowCount() > 0:
+            property_layout.removeRow(0)
+
+        # 添加
+        # TODO: 添加k,v property
+        for k in self.kwargs:
+            pass
+
+
+    def hide_property(self):
+        pass
+
+    def itemChange(self, change: PySide6.QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+        # item 被移动
+        if change == QGraphicsItem.ItemPositionChange:
+            for arrow in self.in_arrows:
+                arrow.updatePosition()
+            for arrow in self.out_arrows:
+                arrow.updatePosition()
+        
+        elif change == QGraphicsItem.ItemSelectedChange:
+            if self.isSelected():
+                # 未选中 -> 选中，显示property
+                self.show_property()
+            else:
+                # 选中 -> 未选中，隐藏property
+                self.hide_property()
+
+        return super().itemChange(change, value)
+
+    def focusOutEvent(self, event: PySide6.QtGui.QFocusEvent) -> None:
+        # 失去焦点时不可修改text
+        self.setTextInteractionFlags(Qt.NoTextInteraction)
+        return super().focusOutEvent(event)
+
+    def mouseDoubleClickEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
+        # 双击可以修改text
+        self.setTextInteractionFlags(Qt.TextEditorInteraction)
+        super().mouseDoubleClickEvent(event)    
+
+    def remove_arrow(self, arrow):
+        pass 
+
+    def remove_arrows(self):
+        pass 
 
 class DiagramScene(QGraphicsScene):
     # TODO：设置item的Z轴1000，line的Z轴-1000
-    # TODO: 双击更改item名字
-    # TODO: 删除选中item
-    # TODO：添加item后取消button选中
+
     def __init__(self, parent):
         super().__init__()
         self.item_mode = None # 'str' , None
+        self.item_kwargs = None
         self.pointer_mode = None  # 'pointer', 'line'
         self.line = None
-        self.parent = parent
+        self.setParent(parent)
         self.in_arrows = []
         self.out_arrows = []
         self.propertys = {}
@@ -47,10 +122,11 @@ class DiagramScene(QGraphicsScene):
 
         # 摁下左键：添加item 或 添加line 或 无动作
         if self.item_mode and self.pointer_mode == 'pointer':  # 添加item
-            item = DiagramItem(self.item_mode)
-            item.setPos(event.scenePos())
+            item = DiagramItem(self.item_mode, self.item_kwargs, event.scenePos(), self)
             self.addItem(item)
-
+            self.parent().tool_box_button_group.checkedButton().setChecked(False) # 添加item后取消toolbox选定
+            self.item_mode = None
+            self.item_kwargs = None
         elif self.pointer_mode == 'line':  # 添加line
             self.line = QGraphicsLineItem(QLineF(event.scenePos(), event.scenePos()))
             # self.line.setPen(QPen(Qt.black, 2))
@@ -190,8 +266,10 @@ class MainWindow(QMainWindow):
             
             if clicked_button.isChecked():
                 self.view.scene().item_mode = clicked_button.text()
+                self.view.scene().item_kwargs = clicked_button.kwargs
             else:
                 self.view.scene().item_mode = None
+                self.view.scene().item_kwargs = None
 
         def create_cell_widget(text):
             button = QToolButton()
