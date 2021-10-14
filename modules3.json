@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "modules": {
+    "model": [
+      {"func": "Linear", "kwargs": {"in_features": 0, "out_features": 0, "test_bool": true, "test_str": "hello", "test_int": 0, "test_float": 0.0}},
+      {"func": "ReLU", "kwargs": {}}
+    ],
+    "data": [
+      {"func": "get_boston_CRIM", "kwargs": {}},
+      {"func": "get_boston_ZN", "kwargs": {}},
+      {"func": "get_boston_INDUS", "kwargs": {}},
+      {"func": "get_boston_CHAS", "kwargs": {}},
+      {"func": "get_boston_NOX", "kwargs": {}},
+      {"func": "get_boston_RM", "kwargs": {}},
+      {"func": "get_boston_AGE", "kwargs": {}},
+      {"func": "get_boston_DIS", "kwargs": {}},
+      {"func": "get_boston_RAD", "kwargs": {}},
+      {"func": "get_boston_TAX", "kwargs": {}},
+      {"func": "get_boston_PTRATIO", "kwargs": {}},
+      {"func": "get_boston_B", "kwargs": {}},
+      {"func": "get_boston_LSTAT", "kwargs": {}},
+      {"func": "get_boston_PRICE", "kwargs": {}}
+    ],
+    "preprocess": [
+      {"func": "cat", "kwargs": {}},
+      {"func": "normalization", "kwargs": {}}
+    ],
+    "loss": [
+      {"func": "MSELoss", "kwargs": {}}
+    ],
+    "optimizer": [
+      {"func": "SGD", "kwargs": {"lr": 0.0}}
+    ]
+  },
+  "hyperparameters": {
+    "epoch": 1,
+    "batch_size": 1,
+    "shuffle": true,
+    "gpu": true,
+    "seed": 1 
+  }
+}
