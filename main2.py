@@ -8,7 +8,13 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
 from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF,)
 from PySide6.QtCore import (QPointF, QRectF, QSize, QSizeF, Qt, QLineF,)
 from copy import deepcopy as copy
-import time
+
+
+# TODO hyperparameters
+# TODO 区分 func, item_name, item text
+# TODO save  
+# TODO item 多选
+# TODO 提供自定义导入数据、导入模块功能
 
 
 class Arrow(QGraphicsLineItem):
@@ -119,7 +125,6 @@ class Arrow(QGraphicsLineItem):
         self.end_item.in_arrows.remove(self)
         
 class DiagramItem(QGraphicsTextItem):
-    # TODO 区分 func_name 与 item text
     
     def __init__(self, text, kwargs, pos, parent) -> None:
         super(DiagramItem, self).__init__()
@@ -134,15 +139,15 @@ class DiagramItem(QGraphicsTextItem):
         self.in_arrows = []
         self.out_arrows = []
     
-    def center_pos(self):
+    def center_pos(self) -> QPointF:
         # 返回item中心的绝对坐标
         top_left = self.pos()
         center = top_left + QPointF(self.width() / 2, self.height() / 2)
         return center
 
-    def show_property(self):    
+    def show_property(self) -> None:    
         # 根据当前k与edit value生成槽函数
-        def build_save(k, edit_value_func):
+        def build_save(k: str, edit_value_func: function) -> function:
             def save():
                 self.kwargs[k] = edit_value_func()
             return save    
@@ -175,7 +180,7 @@ class DiagramItem(QGraphicsTextItem):
                 edit.textChanged.connect(build_save(k, edit.text))
             property_layout.addRow(k, edit)
 
-    def clear_property(self):
+    def clear_property(self) -> None:
         # 清空布局
         property_layout = self.parent().parent().property_box.layout()
         while property_layout.rowCount() > 0:
@@ -210,11 +215,11 @@ class DiagramItem(QGraphicsTextItem):
         self.setTextInteractionFlags(Qt.TextEditorInteraction)
         super().mouseDoubleClickEvent(event)    
 
-    def remove_arrow(self, arrow: Arrow):
+    def remove_arrow(self, arrow: Arrow) -> None:
         arrow.remove_item_list() # 将箭头从所连接的item list 中删除
         self.parent().removeItem(arrow)  # 将箭头从scene中删除
 
-    def remove_arrows(self):
+    def remove_arrows(self) -> None:
         for arrow in self.in_arrows[:]:
             self.remove_arrow(arrow)
 
@@ -227,15 +232,13 @@ class DiagramItem(QGraphicsTextItem):
         polygon = QPolygonF(rect)
         return polygon
 
-    def width(self):
+    def width(self) ->float:
         return self.boundingRect().width()
 
-    def height(self):
+    def height(self) -> float:
         return self.boundingRect().height()
 
 class DiagramScene(QGraphicsScene):
-    # TODO：设置item的Z轴1000，line的Z轴-1000
-
     def __init__(self, parent):
         super().__init__()
         self.item_mode = None # 'str' , None
@@ -403,7 +406,6 @@ class MainWindow(QMainWindow):
 
     def init_tool_box(self):
         # 创建工具箱（左栏）
-        # TODO 提供自定义导入数据、导入模块功能
         def button_group_clicked(i):
             # 只能不选或单选
             clicked_button = self.tool_box_button_group.button(i)

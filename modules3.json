@@ -30,13 +30,9 @@
     ],
     "optimizer": [
       {"func": "SGD", "kwargs": {"lr": 0.0}}
+    ],
+    "hyperparameters": [
+        {"func": "DL", "kwargs": {"epoch": 1, "batch_size": 1, "shuffle": true, "gpu": true, "seed": 1 }}
     ]
-  },
-  "hyperparameters": {
-    "epoch": 1,
-    "batch_size": 1,
-    "shuffle": true,
-    "gpu": true,
-    "seed": 1 
   }
 }
