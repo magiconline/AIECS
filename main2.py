@@ -11,7 +11,8 @@ from copy import deepcopy as copy
 
 
 # TODO hyperparameters
-# TODO 区分 func, item_name, item text
+# TODO 区分 func, item_id, item text
+# TODO 记录 dtype, _meta, i
 # TODO save  
 # TODO item 多选
 # TODO 提供自定义导入数据、导入模块功能
@@ -147,7 +148,7 @@ class DiagramItem(QGraphicsTextItem):
 
     def show_property(self) -> None:    
         # 根据当前k与edit value生成槽函数
-        def build_save(k: str, edit_value_func: function) -> function:
+        def build_save(k: str, edit_value_func):
             def save():
                 self.kwargs[k] = edit_value_func()
             return save    
