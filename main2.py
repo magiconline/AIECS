@@ -1,13 +1,17 @@
-import sys
-import os
 import json
 import math
-from typing import Any, Optional
-import PySide6
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem, QGraphicsPolygonItem, QGraphicsTextItem, QLineEdit, QMainWindow, QMessageBox, QSpinBox, QToolBox, QHBoxLayout, QGraphicsView,QGraphicsScene, QWidget, QToolButton, QComboBox, QFormLayout, QButtonGroup,QVBoxLayout, )
-from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF,)
-from PySide6.QtCore import (QPointF, QRectF, QSize, QSizeF, Qt, QLineF,)
+import os
+import sys
 from copy import deepcopy as copy
+from typing import Any, Optional
+
+import PySide6
+from PySide6.QtCore import (QPointF, QRectF, QSizeF, Qt, QLineF, )
+from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF, )
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem,
+                               QGraphicsTextItem, QLineEdit, QMainWindow, QMessageBox, QSpinBox,
+                               QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
+                               QFormLayout, QButtonGroup, QVBoxLayout, )
 
 
 # TODO hyperparameters
@@ -26,13 +30,13 @@ class Arrow(QGraphicsLineItem):
 
         self.arrow_size = 20.0
         self.arrow_head = QPolygonF()
-        
+
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setPen(QPen(Qt.black, 2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
 
     def boundingRect(self) -> PySide6.QtCore.QRectF:
         # 由于箭头比直线大，重新计算graphics scene 需要刷新的范围
-        extra = (self.pen().width() + self.arrow_size) / 2 
+        extra = (self.pen().width() + self.arrow_size) / 2
         p1 = self.line().p1()
         p2 = self.line().p2()
         rect = QRectF(p1, QSizeF(p2.x() - p1.x(), p2.y() - p1.y()))
@@ -49,8 +53,9 @@ class Arrow(QGraphicsLineItem):
         start = self.mapFromItem(self.start_item, self.start_item.width() / 2, self.start_item.height() / 2)
         end = self.mapFromItem(self.end_item, self.end_item.width() / 2, self.end_item.height() / 2)
         self.setLine(QLineF(start, end))
-        
-    def paint(self, painter: PySide6.QtGui.QPainter, option: PySide6.QtWidgets.QStyleOptionGraphicsItem, widget: Optional[PySide6.QtWidgets.QWidget] = ...) -> None:
+
+    def paint(self, painter: PySide6.QtGui.QPainter, option: PySide6.QtWidgets.QStyleOptionGraphicsItem,
+              widget: Optional[PySide6.QtWidgets.QWidget] = ...) -> None:
         # 绘制直线和箭头
 
         # pen 绘制轮廓，brush 填充
@@ -73,7 +78,7 @@ class Arrow(QGraphicsLineItem):
                 intersectType, end_intersect_point = poly_line.intersects(center_line)
                 if intersectType == QLineF.BoundedIntersection:
                     break
-                p1 = p2 
+                p1 = p2
 
             start_polygon = self.start_item.polygon()
             p1 = start_polygon.at(0) + self.start_item.pos()
@@ -84,11 +89,11 @@ class Arrow(QGraphicsLineItem):
                 intersectType, start_intersect_point = poly_line.intersects(center_line)
                 if intersectType == QLineF.BoundedIntersection:
                     break
-                p1 = p2 
+                p1 = p2
 
-        # 绘制直线
+                # 绘制直线
         self.setLine(QLineF(end_intersect_point, start_intersect_point))
-        
+
         # 绘制箭头
         if self.line().length() == 0:
             # 直线长度为0 不绘制箭头
@@ -124,9 +129,10 @@ class Arrow(QGraphicsLineItem):
         # 将自己从start_item 和 end_item 中的arrow list 删除
         self.start_item.out_arrows.remove(self)
         self.end_item.in_arrows.remove(self)
-        
+
+
 class DiagramItem(QGraphicsTextItem):
-    
+
     def __init__(self, text, kwargs, pos, parent) -> None:
         super(DiagramItem, self).__init__()
 
@@ -139,20 +145,22 @@ class DiagramItem(QGraphicsTextItem):
         self.kwargs = copy(kwargs)
         self.in_arrows = []
         self.out_arrows = []
-    
+
     def center_pos(self) -> QPointF:
         # 返回item中心的绝对坐标
         top_left = self.pos()
         center = top_left + QPointF(self.width() / 2, self.height() / 2)
         return center
 
-    def show_property(self) -> None:    
+    def show_property(self) -> None:
         # 根据当前k与edit value生成槽函数
         def build_save(k: str, edit_value_func):
             def save():
                 self.kwargs[k] = edit_value_func()
-            return save    
-        # 清空布局
+
+            return save
+            # 清空布局
+
         self.clear_property()
 
         # 添加布局
@@ -167,12 +175,12 @@ class DiagramItem(QGraphicsTextItem):
 
             elif isinstance(v, int):
                 edit = QSpinBox()
-                edit.valueChanged.connect(build_save(k, edit.value)) 
-                edit.setValue(v)         
-                   
+                edit.valueChanged.connect(build_save(k, edit.value))
+                edit.setValue(v)
+
             elif isinstance(v, float):
                 edit = QDoubleSpinBox()
-                edit.valueChanged.connect(build_save(k, edit.value)) 
+                edit.valueChanged.connect(build_save(k, edit.value))
                 edit.setValue(v)
                 edit.setDecimals(5)
 
@@ -194,7 +202,7 @@ class DiagramItem(QGraphicsTextItem):
                 arrow.updatePosition()
             for arrow in self.out_arrows:
                 arrow.updatePosition()
-        
+
         elif change == QGraphicsItem.ItemSelectedChange:
             if self.isSelected():
                 # 选中 -> 未选中
@@ -208,16 +216,16 @@ class DiagramItem(QGraphicsTextItem):
                 self.setTextInteractionFlags(Qt.NoTextInteraction)
             else:
                 self.show_property()
-        
+
         return super().itemChange(change, value)
 
     def mouseDoubleClickEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 双击可以修改text
         self.setTextInteractionFlags(Qt.TextEditorInteraction)
-        super().mouseDoubleClickEvent(event)    
+        super().mouseDoubleClickEvent(event)
 
     def remove_arrow(self, arrow: Arrow) -> None:
-        arrow.remove_item_list() # 将箭头从所连接的item list 中删除
+        arrow.remove_item_list()  # 将箭头从所连接的item list 中删除
         self.parent().removeItem(arrow)  # 将箭头从scene中删除
 
     def remove_arrows(self) -> None:
@@ -233,16 +241,17 @@ class DiagramItem(QGraphicsTextItem):
         polygon = QPolygonF(rect)
         return polygon
 
-    def width(self) ->float:
+    def width(self) -> float:
         return self.boundingRect().width()
 
     def height(self) -> float:
         return self.boundingRect().height()
 
+
 class DiagramScene(QGraphicsScene):
     def __init__(self, parent):
         super().__init__()
-        self.item_mode = None # 'str' , None
+        self.item_mode = None  # 'str' , None
         self.item_kwargs = None
         self.pointer_mode = None  # 'pointer', 'line'
         self.line = None
@@ -250,7 +259,7 @@ class DiagramScene(QGraphicsScene):
         self.in_arrows = []
         self.out_arrows = []
         self.propertys = {}
-        
+
     def mousePressEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         if event.button() != Qt.LeftButton:  # 只响应左键
             return
@@ -259,7 +268,7 @@ class DiagramScene(QGraphicsScene):
         if self.item_mode and self.pointer_mode == 'pointer':  # 添加item
             item = DiagramItem(self.item_mode, self.item_kwargs, event.scenePos(), self)
             self.addItem(item)
-            self.parent().tool_box_button_group.checkedButton().setChecked(False) # 添加item后取消toolbox选定
+            self.parent().tool_box_button_group.checkedButton().setChecked(False)  # 添加item后取消toolbox选定
             self.item_mode = None
             self.item_kwargs = None
         elif self.pointer_mode == 'line':  # 添加line
@@ -271,7 +280,7 @@ class DiagramScene(QGraphicsScene):
 
     def mouseMoveEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 移动item 或者 移动line 或者无动作
-        if self.pointer_mode == 'line' and self.line: # 移动line
+        if self.pointer_mode == 'line' and self.line:  # 移动line
             line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(line)
         elif self.pointer_mode == 'pointer' and self.item_mode == None:  # 移动item
@@ -284,7 +293,7 @@ class DiagramScene(QGraphicsScene):
             start_items = self.items(self.line.line().p1())
             while len(start_items) and start_items[0] == self.line:
                 start_items.pop(0)
-            
+
             end_items = self.items(self.line.line().p2())
             while len(end_items) and end_items[0] == self.line:
                 end_items.pop(0)
@@ -292,7 +301,8 @@ class DiagramScene(QGraphicsScene):
             self.removeItem(self.line)
             self.line = None
 
-            if (len(start_items) and len(end_items)) and (start_items[0] != end_items[0] and (not self.items_connected(start_items[0], end_items[0]))):
+            if (len(start_items) and len(end_items)) and (
+                    start_items[0] != end_items[0] and (not self.items_connected(start_items[0], end_items[0]))):
                 # 两个item存在 且 不相同 且 未连线
                 arrow = Arrow(start_items[0], end_items[0])
                 start_items[0].out_arrows.append(arrow)
@@ -301,7 +311,7 @@ class DiagramScene(QGraphicsScene):
                 arrow.update_position()
 
         super().mouseReleaseEvent(event)
-    
+
     def items_connected(self, item1: DiagramItem, item2: DiagramItem) -> bool:
         # 判断两个item是否连线
         # item1 <- item2: 查找item1 in_arrows list 与 item2 out_arrows list 中是否有相同的arrow
@@ -315,6 +325,7 @@ class DiagramScene(QGraphicsScene):
                 return True
 
         return False
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -413,7 +424,7 @@ class MainWindow(QMainWindow):
             for button in self.tool_box_button_group.buttons()[:]:
                 if clicked_button != button:
                     button.setChecked(False)  # 取消其他按钮的选中，i按钮已经自动反选
-            
+
             if clicked_button.isChecked():
                 self.view.scene().item_mode = clicked_button.text()
                 self.view.scene().item_kwargs = clicked_button.kwargs
@@ -458,12 +469,12 @@ class MainWindow(QMainWindow):
         layout = QFormLayout()
         self.property_box = QWidget()
         self.property_box.setLayout(layout)
-        
+
     def init_view(self):
         # 初始化视图
         self.scene = DiagramScene(self)
         self.scene.setSceneRect(QRectF(0, 0, 5000, 5000))
-        
+
         self.view = QGraphicsView(self.scene)
 
     def init_action(self):
@@ -506,6 +517,7 @@ class MainWindow(QMainWindow):
     def exit(self):
         pass
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
@@ -513,4 +525,3 @@ if __name__ == '__main__':
     window.show()
 
     sys.exit(app.exec())
-    
