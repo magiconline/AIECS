@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel)
 
 
+# TODO: text不可修改，text_id -> name, 保留 dtype
 # TODO save
 # TODO open
 # TODO run
@@ -272,9 +273,6 @@ class DiagramScene(QGraphicsScene):
         self.pointer_mode = None  # 'pointer', 'line'
         self.line = None
         self.setParent(parent)
-        self.in_arrows = []
-        self.out_arrows = []
-        self.propertys = {}
         self.item_count = 0
 
     def mousePressEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
@@ -357,6 +355,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('AI Experiment Control System')
 
         self.modeule_js_path = 'modules.json'
+        self.save_js_path = 'save.json'
+        self.version = "1.0.0"
 
         # 初始化
         self.init_action()
@@ -467,11 +467,11 @@ class MainWindow(QMainWindow):
             return button
 
         self.tool_box = QToolBox()
-        self.tool_box.setToolTip('tool box')
         self.tool_box.setMinimumWidth(150)
 
         with open(self.modeule_js_path) as f:
             modules = json.load(f)
+        self.modules_version = modules['version']
 
         self.tool_box_button_group = QButtonGroup()
         self.tool_box_button_group.setExclusive(False)  # 可以有任意多个选中
@@ -524,11 +524,39 @@ class MainWindow(QMainWindow):
         pass
 
     def save(self):
+        def traverse(item: DiagramItem) -> dict:
+            # 保存自己
+            ret = {
+                'text': item.toPlainText(),
+                'id_': item.id_,
+                'dtype': item.dtype,
+                'pos': [item.pos().x(), item.pos().y()],
+                'in_items': [traverse(arrow.start_item) for arrow in item.in_arrows]
+            }
+            return ret
+
         # TODO 保存
-        # 保存view
-        # 对item排序
+        js = {}
+        js['version'] = self.version
+        js['modules_version'] = self.modules_version
+
+        # 保存scene
+        scene = self.scene
+        js['scene'] = {}
+        js['scene']['item_count'] = scene.item_count
+
         # 保存item
-        pass
+        # visited_items = set()
+        js['model'] = []
+
+        for item in scene.items():
+            if isinstance(item, DiagramItem) and len(item.out_arrows) == 0:
+                # 找到队尾item
+                js['model'].append(traverse(item))
+
+        # 保存
+        with open(self.save_js_path, 'w') as f:
+            json.dump(js, f)
 
     def about(self):
         QMessageBox.about(self, 'About action', 'test message.')

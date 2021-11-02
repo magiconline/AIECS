@@ -1,0 +1,93 @@
+{
+	"version": "1.0.0",
+	"scene": {
+		"item_count": 5
+	},
+	"model": [
+		{
+			"text": "ReLU",
+			"id_": 4,
+			"dtype": "model",
+			"pos": [
+				2148.0,
+				2271.0
+			],
+			"in_arrows": [
+				{
+					"text": "Linear",
+					"id_": 2,
+					"dtype": "model",
+					"pos": [
+						2044.0,
+						2240.0
+					],
+					"in_arrows": [
+						{
+							"text": "Linear",
+							"id_": 3,
+							"dtype": "model",
+							"pos": [
+								1934.0,
+								2202.0
+							],
+							"in_arrows": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"text": "Linear",
+			"id_": 1,
+			"dtype": "model",
+			"pos": [
+				2174.0,
+				2186.0
+			],
+			"in_arrows": [
+				{
+					"text": "Linear",
+					"id_": 0,
+					"dtype": "model",
+					"pos": [
+						2035.0,
+						2175.0
+					],
+					"in_arrows": [
+						{
+							"text": "Linear",
+							"id_": 3,
+							"dtype": "model",
+							"pos": [
+								1934.0,
+								2202.0
+							],
+							"in_arrows": []
+						}
+					]
+				},
+				{
+					"text": "Linear",
+					"id_": 2,
+					"dtype": "model",
+					"pos": [
+						2044.0,
+						2240.0
+					],
+					"in_arrows": [
+						{
+							"text": "Linear",
+							"id_": 3,
+							"dtype": "model",
+							"pos": [
+								1934.0,
+								2202.0
+							],
+							"in_arrows": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
