@@ -1,45 +1,60 @@
 {
-  "version": 1,
-  "input": [
-    "get_boston_CRIM",
-    "get_boston_ZN",
-    "get_boston_INDUS",
-    "get_boston_CHAS",
-    "get_boston_NOX",
-    "get_boston_RM",
-    "get_boston_AGE",
-    "get_boston_DIS",
-    "get_boston_RAD",
-    "get_boston_TAX",
-    "get_boston_PTRATIO",
-    "get_boston_B",
-    "get_boston_LSTAT"
-  ],
-  "output": [
-    "get_boston_PRICE"
-  ],
-  "preprocess": [
-
-  ],
-  "model": [
-    {"func": "Linear", "in_features": "13", "out_features": "10"},
-    {"func": "ReLU"},
-    {"func": "Linear", "in_features": "10", "out_features": "10"},
-    {"func": "ReLU"},
-    {"func": "Linear", "in_features": "10", "out_features": "1"}
-  ],
-  "optimizer": {
-    "func": "SGD",
-    "lr": "0.001"
-  },
-  "loss_func": {
-    "func": "MSELoss"
-  },
-  "epoch": 30,
-  "batch_size": 5,
-  "shuffle": true,
-  "visualization": [
-    "train_loss_history"
-  ],
-  "gpu": true
+	"version": 1,
+	"input": [
+		"get_boston_CRIM",
+		"get_boston_ZN",
+		"get_boston_INDUS",
+		"get_boston_CHAS",
+		"get_boston_NOX",
+		"get_boston_RM",
+		"get_boston_AGE",
+		"get_boston_DIS",
+		"get_boston_RAD",
+		"get_boston_TAX",
+		"get_boston_PTRATIO",
+		"get_boston_B",
+		"get_boston_LSTAT"
+	],
+	"output": [
+		"get_boston_PRICE"
+	],
+	"preprocess": [
+	],
+	"model": [
+		{
+			"func": "Linear",
+			"in_features": "13",
+			"out_features": "10"
+		},
+		{
+			"func": "ReLU"
+		},
+		{
+			"func": "Linear",
+			"in_features": "10",
+			"out_features": "10"
+		},
+		{
+			"func": "ReLU"
+		},
+		{
+			"func": "Linear",
+			"in_features": "10",
+			"out_features": "1"
+		}
+	],
+	"optimizer": {
+		"func": "SGD",
+		"lr": "0.001"
+	},
+	"loss_func": {
+		"func": "MSELoss"
+	},
+	"epoch": 30,
+	"batch_size": 5,
+	"shuffle": true,
+	"visualization": [
+		"train_loss_history"
+	],
+	"gpu": true
 }

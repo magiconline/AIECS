@@ -1,5 +1,5 @@
-from sklearn.datasets import load_boston
 import torch
+from sklearn.datasets import load_boston
 
 
 # 返回floatTensor类型数据，shape: n*1

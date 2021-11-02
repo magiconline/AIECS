@@ -4,8 +4,6 @@ from PySide6.QtCore import QFile, QIODevice, QMimeData, QPoint, Qt, QTextStream
 from PySide6.QtGui import QDrag, QPalette, QPixmap
 from PySide6.QtWidgets import QApplication, QFrame, QLabel, QWidget
 
-import draggabletext_rc
-
 
 class DragLabel(QLabel):
     def __init__(self, text, parent):
@@ -105,7 +103,6 @@ class DragWidget(QWidget):
 
 
 if __name__ == '__main__':
-
     import sys
 
     app = QApplication(sys.argv)

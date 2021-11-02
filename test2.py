@@ -1,15 +1,13 @@
 import json
 import os
-import torch
-from test_IO import *
+
 from torch.nn import *
-from torch.optim import *
-from torch.utils.data import DataLoader, Dataset, TensorDataset
-from torch import cat
+
 
 class CLSRUN():
     def __init__(self):
         pass
+
 
 def str_dict(d, func='func', params={}):
     s = d[func] + '('
@@ -28,6 +26,7 @@ def str_dict(d, func='func', params={}):
             s = s + k + '=' + v + ','
 
     return s
+
 
 def run(json_path):
     with open(json_path) as f:
@@ -53,7 +52,6 @@ def run(json_path):
 
         x = eval(str_dict(js_model['x']))
         models.append([model, x])
-
 
 
 if __name__ == '__main__':

@@ -1,12 +1,13 @@
-import sys
 import math
-from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QGraphicsLineItem, QGraphicsItem, QGraphicsTextItem,
+import sys
+
+import PySide6
+from PySide6.QtCore import Qt, QRectF, QSizeF, QLineF, QPointF, Signal
+from PySide6.QtGui import QPolygonF, QPen, QIcon, QAction
+from PySide6.QtWidgets import (QApplication, QMainWindow, QGraphicsLineItem, QGraphicsItem, QGraphicsTextItem,
                                QGraphicsScene, QStyle, QHBoxLayout, QGraphicsView, QWidget, QButtonGroup,
                                QToolButton, QVBoxLayout, QToolBox, QComboBox, QMessageBox, QFormLayout, QLineEdit)
-from PySide6.QtGui import QPolygonF, QPen, QIcon, QAction, QPainterPath
-from PySide6.QtCore import Qt, QRectF, QSizeF, QLineF, QPointF, Signal
-import PySide6
-import os
+
 
 class Arrow(QGraphicsLineItem):
     def __init__(self, start_item, end_item, parent=None, scene=None):
@@ -276,7 +277,6 @@ class MainWindow(QMainWindow):
         self.view = QGraphicsView(self.scene)
         layout.addWidget(self.view)
         layout.addWidget(self.property_widget)
-
 
         self.widget = QWidget()
         self.widget.setLayout(layout)

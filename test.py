@@ -1,12 +1,13 @@
-import torch
 from torch.nn import *
-from torch.optim import *
-from torch.utils.data import DataLoader, Dataset, TensorDataset
-import numpy as np
-from test_IO import *
 import json
-import time
 import os
+import time
+
+import numpy as np
+from torch.nn import *
+from torch.utils.data import DataLoader, TensorDataset
+
+from test_IO import *
 
 
 def str2func(d, func='func', params={}):
