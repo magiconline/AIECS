@@ -1,4 +1,3 @@
-from torch.nn import *
 import json
 import os
 import time

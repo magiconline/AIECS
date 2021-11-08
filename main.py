@@ -13,13 +13,19 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel)
 
+import torch
+from torch.nn import *
+from torch.utils.data import DataLoader, TensorDataset
 
-# TODO: text不可修改，text_id -> name, 保留 dtype
-# TODO save
-# TODO open
+from epics_get import *
+from epics_set import *
+
+
 # TODO run
-# TODO item 多选
-# TODO 提供自定义导入数据、导入模块功能
+# TODO open
+
+
+VERSION = "0.1.0"
 
 
 class Arrow(QGraphicsLineItem):
@@ -133,7 +139,7 @@ class Arrow(QGraphicsLineItem):
 
 class DiagramItem(QGraphicsTextItem):
 
-    def __init__(self, text, kwargs, pos, parent, dtype, id_) -> None:
+    def __init__(self, name, kwargs, pos, parent, dtype) -> None:
         # text:
         # kwargs:
         # dtype: model, data, preprocess, loss, optimizer, hyperparameters
@@ -142,7 +148,6 @@ class DiagramItem(QGraphicsTextItem):
         # parent
         super(DiagramItem, self).__init__()
 
-        self.id_ = id_
         self.dtype = dtype
 
         self.setPos(pos)
@@ -150,7 +155,7 @@ class DiagramItem(QGraphicsTextItem):
         self.setFlag(QGraphicsItem.ItemIsMovable)  # 可以移动
         self.setFlag(QGraphicsItem.ItemIsSelectable)  # 可以选中
 
-        self.setPlainText(text)
+        self.setPlainText(name)
         self.kwargs = copy(kwargs)
         self.in_arrows = []
         self.out_arrows = []
@@ -176,9 +181,8 @@ class DiagramItem(QGraphicsTextItem):
         property_box: QWidget = self.parent().parent().property_box
         property_layout = property_box.layout()
 
-        property_layout.addRow('text: ', QLabel(self.toPlainText()))
+        property_layout.addRow('name:5 ', QLabel(self.toPlainText()))
         property_layout.addRow('dtype: ', QLabel(self.dtype))
-        property_layout.addRow('id: ', QLabel(str(self.id_)))
 
         for k, v in self.kwargs.items():
             if isinstance(v, bool):
@@ -235,11 +239,6 @@ class DiagramItem(QGraphicsTextItem):
 
         return super().itemChange(change, value)
 
-    def mouseDoubleClickEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
-        # 双击可以修改text
-        self.setTextInteractionFlags(Qt.TextEditorInteraction)
-        super().mouseDoubleClickEvent(event)
-
     def remove_arrow(self, arrow: Arrow) -> None:
         arrow.remove_item_list()  # 将箭头从所连接的item list 中删除
         self.parent().removeItem(arrow)  # 将箭头从scene中删除
@@ -282,7 +281,7 @@ class DiagramScene(QGraphicsScene):
         # 摁下左键：添加item 或 添加line 或 无动作
         if self.item_text and self.pointer_mode == 'pointer':
             # 添加item
-            item = DiagramItem(self.item_text, self.item_kwargs, event.scenePos(), self, self.dtype, self.item_count)
+            item = DiagramItem(self.item_text + '_' + str(self.item_count), self.item_kwargs, event.scenePos(), self, self.dtype)
             self.addItem(item)
             self.item_count += 1
 
@@ -355,8 +354,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('AI Experiment Control System')
 
         self.modeule_js_path = 'modules.json'
-        self.save_js_path = 'save.json'
-        self.version = "1.0.0"
+        self.js_file_path = 'save.json'
+        self.save_version = "0.1.0"
+        self.saved = True
 
         # 初始化
         self.init_action()
@@ -471,7 +471,7 @@ class MainWindow(QMainWindow):
 
         with open(self.modeule_js_path) as f:
             modules = json.load(f)
-        self.modules_version = modules['version']
+        self.module_version = modules['version']
 
         self.tool_box_button_group = QButtonGroup()
         self.tool_box_button_group.setExclusive(False)  # 可以有任意多个选中
@@ -515,30 +515,52 @@ class MainWindow(QMainWindow):
         self.run_action = QAction('Run', triggered=self.run)
 
     def run(self):
-        pass
+        if not self.saved:
+            self.save()
+
+        with open(self.js_file_path) as f:
+            js_file = json.load(f)
+
+        # TODO 生成模型
+        model_dict = {}
+        data_dict = {}
+        for model in js_file['models']:
+            if model['dtype'] == 'hyperparameters':
+                pass 
+            else:
+                for k, v in model.items():
+                    print(k, v)
+
+        # TODO 运行
+
+        # TODO 输出运行结果
+        
 
     def new(self):
-        pass
+        self.close()
+        self.saved = False
+        # TODO 更改文件名
 
     def open(self):
-        pass
+        # TODO 选择文件
+        self.close()
+        # TODO 读取文件
 
     def save(self):
         def traverse(item: DiagramItem) -> dict:
             # 保存自己
             ret = {
-                'text': item.toPlainText(),
-                'id_': item.id_,
+                'name': item.toPlainText(),
                 'dtype': item.dtype,
                 'pos': [item.pos().x(), item.pos().y()],
                 'in_items': [traverse(arrow.start_item) for arrow in item.in_arrows]
             }
             return ret
 
-        # TODO 保存
+        # TODO 检查self.js_file_path，如果为None则提示输入文件名
         js = {}
-        js['version'] = self.version
-        js['modules_version'] = self.modules_version
+        js['save_version'] = self.save_version
+        js['module_version'] = self.module_version
 
         # 保存scene
         scene = self.scene
@@ -547,16 +569,18 @@ class MainWindow(QMainWindow):
 
         # 保存item
         # visited_items = set()
-        js['model'] = []
+        js['models'] = []
 
         for item in scene.items():
             if isinstance(item, DiagramItem) and len(item.out_arrows) == 0:
                 # 找到队尾item
-                js['model'].append(traverse(item))
+                js['models'].append(traverse(item))
 
         # 保存
-        with open(self.save_js_path, 'w') as f:
+        with open(self.js_file_path, 'w') as f:
             json.dump(js, f)
+
+        print('File saved in', self.js_file_path)
 
     def about(self):
         QMessageBox.about(self, 'About action', 'test message.')
@@ -577,6 +601,10 @@ class MainWindow(QMainWindow):
     def exit(self):
         pass
 
+    def close(self):
+        # TODO 检测是否保存，如果未保存则提示保存
+        self.init_view()
+        self.init_layout()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
