@@ -1,116 +1,147 @@
 {
-	"version": "0.1.0",
-	"modules": {
-		"model": [
-			{
-				"func": "Linear",
-				"kwargs": {
-					"in_features": 0,
-					"out_features": 0,
-					"test_bool": true,
-					"test_str": "hello",
-					"test_int": 0,
-					"test_float": 0.0
-				}
-			},
-			{
-				"func": "ReLU",
-				"kwargs": {}
-			}
-		],
-		"data": [
-			{
-				"func": "get_boston_CRIM",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_ZN",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_INDUS",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_CHAS",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_NOX",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_RM",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_AGE",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_DIS",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_RAD",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_TAX",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_PTRATIO",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_B",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_LSTAT",
-				"kwargs": {}
-			},
-			{
-				"func": "get_boston_PRICE",
-				"kwargs": {}
-			}
-		],
-		"preprocess": [
-			{
-				"func": "cat",
-				"kwargs": {}
-			},
-			{
-				"func": "normalization",
-				"kwargs": {}
-			}
-		],
-		"loss": [
-			{
-				"func": "MSELoss",
-				"kwargs": {}
-			}
-		],
-		"optimizer": [
-			{
-				"func": "SGD",
-				"kwargs": {
-					"lr": 0.0
-				}
-			}
-		],
-		"hyperparameters": [
-			{
-				"func": "DL",
-				"kwargs": {
-					"epoch": 1,
-					"batch_size": 1,
-					"shuffle": true,
-					"gpu": true,
-					"seed": 1
-				}
-			}
-		]
-	}
+    "version": "0.1.0",
+    "modules": {
+        "model": [
+            {
+                "name": "Linear",
+                "kwargs": {
+                    "func": "Linear",
+                    "in_features": 0,
+                    "out_features": 0
+                }
+            },
+            {
+                "name": "ReLU",
+                "kwargs": {
+                    "func": "ReLU"
+                }
+            }
+        ],
+        "data": [
+            {
+                "name": "get_boston_CRIM",
+                "kwargs": {
+                    "func": "get_boston_CRIM"
+                }
+            },
+            {
+                "name": "get_boston_ZN",
+                "kwargs": {
+                    "func": "get_boston_ZN"
+                }
+            },
+            {
+                "name": "get_boston_INDUS",
+                "kwargs": {
+                    "func": "get_boston_INDUS"
+                }
+            },
+            {
+                "name": "get_boston_CHAS",
+                "kwargs": {
+                    "func": "get_boston_CHAS"
+                }
+            },
+            {
+                "name": "get_boston_NOX",
+                "kwargs": {
+                    "func": "get_boston_NOX"
+                }
+            },
+            {
+                "name": "get_boston_RM",
+                "kwargs": {
+                    "func": "get_boston_RM"
+                }
+            },
+            {
+                "name": "get_boston_AGE",
+                "kwargs": {
+                    "func": "get_boston_AGE"
+                }
+            },
+            {
+                "name": "get_boston_DIS",
+                "kwargs": {
+                    "func": "get_boston_DIS"
+                }
+            },
+            {
+                "name": "get_boston_RAD",
+                "kwargs": {
+                    "func": "get_boston_RAD"
+                }
+            },
+            {
+                "name": "get_boston_TAX",
+                "kwargs": {
+                    "func": "get_boston_TAX"
+                }
+            },
+            {
+                "name": "get_boston_PTRATIO",
+                "kwargs": {
+                    "func": "get_boston_PTRATIO"
+                }
+            },
+            {
+                "name": "get_boston_B",
+                "kwargs": {
+                    "func": "get_boston_B"
+                }
+            },
+            {
+                "name": "get_boston_LSTAT",
+                "kwargs": {
+                    "func": "get_boston_LSTAT"
+                }
+            },
+            {
+                "name": "get_boston_PRICE",
+                "kwargs": {
+                    "func": "get_boston_PRICE"
+                }
+            }
+        ],
+        "preprocess": [
+            {
+                "name": "cat",
+                "kwargs": {
+                    "func": "torch.cat",
+                    "tensors": [],
+                    "dim": 1
+                }
+            }
+        ],
+        "loss": [
+            {
+                "name": "MSELoss",
+                "kwargs": {
+                    "func": "MSELoss"
+                }
+            }
+        ],
+        "optimizer": [
+            {
+                "name": "SGD",
+                "kwargs": {
+                    "func": "SGD",
+                    "lr": 0.1
+                }
+            }
+        ],
+        "hyperparameters": [
+            {
+                "name": "DL",
+                "kwargs": {
+                    "func": "DL",
+                    "epoch": 1,
+                    "batch_size": 1,
+                    "shuffle": true,
+                    "gpu": true,
+                    "seed": 1
+                }
+            }
+        ]
+    }
 }

@@ -2,34 +2,175 @@
     "save_version": "0.1.0",
     "module_version": "0.1.0",
     "scene": {
-        "item_count": 3
+        "item_count": 13
     },
     "models": [
         {
-            "name": "Linear_2",
-            "dtype": "model",
+            "name": "DL_12",
+            "dtype": "hyperparameters",
             "pos": [
-                2248.0,
-                2217.0
+                2341.0,
+                2487.0
             ],
+            "kwargs": {
+                "func": "DL",
+                "epoch": 1,
+                "batch_size": 1,
+                "shuffle": true,
+                "gpu": true,
+                "seed": 1
+            },
+            "in_items": []
+        },
+        {
+            "name": "SGD_11",
+            "dtype": "optimizer",
+            "pos": [
+                2998.0,
+                2288.0
+            ],
+            "kwargs": {
+                "func": "SGD",
+                "lr": 0.0
+            },
             "in_items": [
                 {
-                    "name": "Linear_0",
-                    "dtype": "model",
+                    "name": "MSELoss_8",
+                    "dtype": "loss",
                     "pos": [
-                        2086.0,
-                        2180.0
+                        2866.0,
+                        2279.0
                     ],
-                    "in_items": []
-                },
-                {
-                    "name": "Linear_1",
-                    "dtype": "model",
-                    "pos": [
-                        2094.0,
-                        2255.0
-                    ],
-                    "in_items": []
+                    "kwargs": {
+                        "func": "MSELoss"
+                    },
+                    "in_items": [
+                        {
+                            "name": "get_boston_PRICE_9",
+                            "dtype": "data",
+                            "pos": [
+                                2765.0,
+                                2360.0
+                            ],
+                            "kwargs": {
+                                "func": "get_boston_PRICE"
+                            },
+                            "in_items": []
+                        },
+                        {
+                            "name": "Linear_7",
+                            "dtype": "model",
+                            "pos": [
+                                2736.0,
+                                2273.0
+                            ],
+                            "kwargs": {
+                                "func": "Linear",
+                                "in_features": 0,
+                                "out_features": 0,
+                                "test_bool": true,
+                                "test_str": "hello",
+                                "test_int": 0,
+                                "test_float": 0.0
+                            },
+                            "in_items": [
+                                {
+                                    "name": "ReLU_6",
+                                    "dtype": "model",
+                                    "pos": [
+                                        2633.0,
+                                        2263.0
+                                    ],
+                                    "kwargs": {
+                                        "func": "ReLU"
+                                    },
+                                    "in_items": [
+                                        {
+                                            "name": "Linear_5",
+                                            "dtype": "model",
+                                            "pos": [
+                                                2518.0,
+                                                2253.0
+                                            ],
+                                            "kwargs": {
+                                                "func": "Linear",
+                                                "in_features": 0,
+                                                "out_features": 0,
+                                                "test_bool": true,
+                                                "test_str": "hello",
+                                                "test_int": 0,
+                                                "test_float": 0.0
+                                            },
+                                            "in_items": [
+                                                {
+                                                    "name": "normalization_4",
+                                                    "dtype": "preprocess",
+                                                    "pos": [
+                                                        2345.0,
+                                                        2254.0
+                                                    ],
+                                                    "kwargs": {
+                                                        "func": "normalization"
+                                                    },
+                                                    "in_items": [
+                                                        {
+                                                            "name": "cat_3",
+                                                            "dtype": "preprocess",
+                                                            "pos": [
+                                                                2222.0,
+                                                                2244.0
+                                                            ],
+                                                            "kwargs": {
+                                                                "func": "torch.cat"
+                                                            },
+                                                            "in_items": [
+                                                                {
+                                                                    "name": "get_boston_CRIM_0",
+                                                                    "dtype": "data",
+                                                                    "pos": [
+                                                                        1999.0,
+                                                                        2190.0
+                                                                    ],
+                                                                    "kwargs": {
+                                                                        "func": "get_boston_CRIM"
+                                                                    },
+                                                                    "in_items": []
+                                                                },
+                                                                {
+                                                                    "name": "get_boston_ZN_1",
+                                                                    "dtype": "data",
+                                                                    "pos": [
+                                                                        2004.0,
+                                                                        2247.0
+                                                                    ],
+                                                                    "kwargs": {
+                                                                        "func": "get_boston_ZN"
+                                                                    },
+                                                                    "in_items": []
+                                                                },
+                                                                {
+                                                                    "name": "get_boston_INDUS_2",
+                                                                    "dtype": "data",
+                                                                    "pos": [
+                                                                        2001.0,
+                                                                        2303.0
+                                                                    ],
+                                                                    "kwargs": {
+                                                                        "func": "get_boston_INDUS"
+                                                                    },
+                                                                    "in_items": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         }

@@ -11,7 +11,7 @@ from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF, )
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem,
                                QGraphicsTextItem, QLineEdit, QMainWindow, QMessageBox, QSpinBox,
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
-                               QFormLayout, QButtonGroup, QVBoxLayout, QLabel)
+                               QFormLayout, QButtonGroup, QVBoxLayout, QLabel, QFileDialog)
 
 import torch
 from torch.nn import *
@@ -22,10 +22,21 @@ from epics_set import *
 
 
 # TODO run
-# TODO open
+# TODO 测试新建、打开、保存、关闭功能 saved
 
 
 VERSION = "0.1.0"
+
+def call(kwargs: dict): 
+    s = kwargs['func'] + '('
+    for k, v in kwargs.items():
+        if k == 'func':
+            continue
+        else:
+            s = s + k + '=' + v + ','
+    s = s + ')'
+    print('call:', s)
+    return eval(s)
 
 
 class Arrow(QGraphicsLineItem):
@@ -278,13 +289,14 @@ class DiagramScene(QGraphicsScene):
         if event.button() != Qt.LeftButton:  # 只响应左键
             return
 
-        # 摁下左键：添加item 或 添加line 或 无动作
+        # 摁下左键：添加item 或 临时显示line 或 无动作
         if self.item_text and self.pointer_mode == 'pointer':
             # 添加item
             item = DiagramItem(self.item_text + '_' + str(self.item_count), self.item_kwargs, event.scenePos(), self, self.dtype)
             self.addItem(item)
             self.item_count += 1
 
+            self.parent().saved = False
             # 添加item后, toolbox中的item取消选定
             # self.parent().tool_box_button_group.checkedButton().setChecked(False)
             # self.item_text = None
@@ -297,6 +309,8 @@ class DiagramScene(QGraphicsScene):
             self.line.setPen(QPen(Qt.black, 2))
             self.addItem(self.line)
 
+            self.parent().saved = False
+
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
@@ -304,7 +318,11 @@ class DiagramScene(QGraphicsScene):
         if self.pointer_mode == 'line' and self.line:  # 移动line
             line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(line)
+
+            self.parent().saved = False
+
         elif self.pointer_mode == 'pointer' and self.item_text == None:  # 移动item
+            self.parent().saved = False
             super(DiagramScene, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
@@ -331,6 +349,8 @@ class DiagramScene(QGraphicsScene):
                 self.addItem(arrow)
                 arrow.update_position()
 
+                self.parent().saved = False
+
         super().mouseReleaseEvent(event)
 
     def items_connected(self, item1: DiagramItem, item2: DiagramItem) -> bool:
@@ -353,8 +373,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.setWindowTitle('AI Experiment Control System')
 
-        self.modeule_js_path = 'modules.json'
-        self.js_file_path = 'save.json'
+        self.module_path = 'modules.json'
+        self.save_file_path = None
         self.save_version = "0.1.0"
         self.saved = True
 
@@ -469,7 +489,7 @@ class MainWindow(QMainWindow):
         self.tool_box = QToolBox()
         self.tool_box.setMinimumWidth(150)
 
-        with open(self.modeule_js_path) as f:
+        with open(self.module_path) as f:
             modules = json.load(f)
         self.module_version = modules['version']
 
@@ -481,7 +501,7 @@ class MainWindow(QMainWindow):
             # 一个页面的button
             layout = QVBoxLayout()
             for js in v:
-                button = create_cell_widget(js['func'])
+                button = create_cell_widget(js['name'])
                 button.kwargs = js['kwargs']
                 button.dtype = k
                 self.tool_box_button_group.addButton(button)
@@ -515,36 +535,110 @@ class MainWindow(QMainWindow):
         self.run_action = QAction('Run', triggered=self.run)
 
     def run(self):
+        def build(model):
+            ret = {}
+
+            for item in model['in_items']:
+                    ret.update(build(item))
+
+            if model['dtype'] == 'hyperparameters':
+                ret.update(model['kwargs'])
+            
+            elif model['dtype'] in ['optimizer', 'loss', 'data']: 
+                ret[model['name']] = call(model['kwargs'])
+            
+            elif model['dtype'] == 'model':
+                if 'model' not in ret.keys():
+                    ret['model'] = Sequential()
+                ret['model'].add_module(model['name'], call(model['kwargs']))
+
+            elif model['dtype'] == 'preprocess':
+                if model['name'] == 'cat':
+                    tensors = []
+                    for item in model['in_items']:
+                        tensors.append(ret[item['name']])
+                    ret[model['name']] = call({**model['kwargs'], 'tensors': tensors})
+                # elif model
+
+            else:
+                print('unknown dtype')
+            
+            return ret
+
         if not self.saved:
             self.save()
 
-        with open(self.js_file_path) as f:
+        with open(self.save_file_path) as f:
             js_file = json.load(f)
 
         # TODO 生成模型
-        model_dict = {}
-        data_dict = {}
+        preprocess_model = {}
         for model in js_file['models']:
-            if model['dtype'] == 'hyperparameters':
-                pass 
-            else:
-                for k, v in model.items():
-                    print(k, v)
+            preprocess_model.update(build(model))
+
 
         # TODO 运行
+        pass
 
         # TODO 输出运行结果
         
 
     def new(self):
-        self.close()
-        self.saved = False
-        # TODO 更改文件名
+        if self.close() == True:
+            self.save_file_path = None
+            self.saved = True
+            print("新建成功")
+
+        else:
+            print("新建失败")
 
     def open(self):
-        # TODO 选择文件
-        self.close()
-        # TODO 读取文件
+        def add_item(model):
+            item = DiagramItem(model['name'], model['kwargs'], QPointF(*model['pos']), self.scene, model['dtype'])    
+            self.scene.addItem(item)
+
+            for item_kwargs in model['in_items']:
+                in_item = add_item(item_kwargs)
+                
+                arrow = Arrow(in_item, item)
+                in_item.out_arrows.append(arrow)
+                item.in_arrows.append(arrow)
+                self.scene.addItem(arrow)
+                arrow.update_position()
+
+            return item
+        # 选择文件
+        file_name = QFileDialog.getOpenFileName(self, 'open file', '.')[0]
+        
+        if file_name == '':
+            print('打开失败')
+            return False
+
+        if self.close() == True:
+            # 读取文件
+            with open(file_name) as f:
+                models = json.load(f)
+
+            if models['save_version'] != self.save_version:
+                print('Warning! Different save version.')
+
+            if models['module_version'] != self.module_version:
+                print('Warning! Different module version.')
+
+            self.scene.item_count = models['scene']['item_count']
+
+            # 创建item, arrow
+            for model in models['models']:
+                add_item(model)
+
+            self.save_file_path = file_name
+            self.saved = True
+            print('打开成功')
+            return True
+
+        else:
+            print('打开失败')
+            return False
 
     def save(self):
         def traverse(item: DiagramItem) -> dict:
@@ -553,11 +647,11 @@ class MainWindow(QMainWindow):
                 'name': item.toPlainText(),
                 'dtype': item.dtype,
                 'pos': [item.pos().x(), item.pos().y()],
-                'in_items': [traverse(arrow.start_item) for arrow in item.in_arrows]
+                'kwargs': item.kwargs,
+                'in_items': [traverse(arrow.start_item) for arrow in item.in_arrows],
             }
             return ret
 
-        # TODO 检查self.js_file_path，如果为None则提示输入文件名
         js = {}
         js['save_version'] = self.save_version
         js['module_version'] = self.module_version
@@ -568,7 +662,6 @@ class MainWindow(QMainWindow):
         js['scene']['item_count'] = scene.item_count
 
         # 保存item
-        # visited_items = set()
         js['models'] = []
 
         for item in scene.items():
@@ -577,10 +670,24 @@ class MainWindow(QMainWindow):
                 js['models'].append(traverse(item))
 
         # 保存
-        with open(self.js_file_path, 'w') as f:
+        # 检查self.save_file_path，如果为None则提示输入文件名
+        if self.save_file_path == None:
+            save_file_path = QFileDialog.getOpenFileName(self, 'Choose save file', '.')[0]
+            
+            if save_file_path != '':
+                self.save_file_path = save_file_path
+            else:
+                print('保存失败')
+                return False
+
+        with open(self.save_file_path, 'w') as f:
             json.dump(js, f)
 
-        print('File saved in', self.js_file_path)
+        print('File saved in', self.save_file_path)
+
+        self.saved = True
+        print('保存成功')
+        return True
 
     def about(self):
         QMessageBox.about(self, 'About action', 'test message.')
@@ -594,17 +701,37 @@ class MainWindow(QMainWindow):
                 # 删除箭头前将自己从所连接的item中删除
                 item.remove_item_list()
             else:
-                print('删除：', type(item))
+                print('删除错误：', type(item))
 
             self.scene.removeItem(item)
 
+        self.saved = False
+
     def exit(self):
-        pass
+        if self.close() == True:
+            sys.exit(0)
 
     def close(self):
-        # TODO 检测是否保存，如果未保存则提示保存
+        # 检测是否保存，如果未保存则提示保存
+        if not self.saved:
+            choice = QMessageBox.warning(self, 'Close without saving!', 'Do you want to close without saving?', QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
+        
+            if choice == QMessageBox.No:
+                if not self.save():
+                    # 保存失败
+                    print('关闭失败')
+                    return False 
+            
+            elif choice == QMessageBox.Cancel:
+                print('关闭失败')
+                return False
+        
         self.init_view()
+        self.init_toolbar()
         self.init_layout()
+        
+        print('关闭成功')
+        return True
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

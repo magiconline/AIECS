@@ -1,14 +1,19 @@
 import torch
 import epics
 from sklearn.datasets import load_boston
+from functools import wraps
 
 # TODO: 如果使用numpy最后转为Tensor可以更好的兼容sklean功能
 # 返回floatTensor类型数据，shape: n*1
 
 def tensor_wrapper(func):
-    def f():
-        return torch.Tensor(func()).unsqueeze(-1)
-
+    @wraps(func)
+    def f(*args, **kwargs):
+        tensor = torch.Tensor(func(*args, **kwargs))
+        if tensor.dim() == 1:
+            # tensor为向量则添加一维 > N * 1
+            tensor = tensor.unsqueeze(-1)
+        return tensor
     return f
 
 
