@@ -1,9 +1,9 @@
 import json
-import math
 import os
 import sys
 from copy import deepcopy as copy
 from typing import Any, Optional
+import numpy as np
 
 import PySide6
 from PySide6.QtCore import (QPointF, QRectF, QSizeF, Qt, QLineF, )
@@ -23,7 +23,7 @@ from epics_set import *
 
 # TODO run
 # TODO 测试新建、打开、保存、关闭功能 saved
-
+# TODO 测试arrow, item 移动刷新
 
 VERSION = "0.1.0"
 
@@ -118,14 +118,14 @@ class Arrow(QGraphicsLineItem):
             return
 
         line = self.line()
-        angle = math.acos(line.dx() / line.length())
+        angle = np.arccos(line.dx() / line.length())
         if line.dy() >= 0:
-            angle = (math.pi * 2.0) - angle
-        arrow_head1 = QPointF(math.sin(angle + math.pi / 3.0) * self.arrow_size,
-                              math.cos(angle + math.pi / 3) * self.arrow_size)
+            angle = (np.pi * 2.0) - angle
+        arrow_head1 = QPointF(np.sin(angle + np.pi / 3.0) * self.arrow_size,
+                              np.cos(angle + np.pi / 3) * self.arrow_size)
         arrow_p1 = line.p1() + arrow_head1  # 相对坐标转换为绝对坐标
-        arrow_head2 = QPointF(math.sin(angle + math.pi - math.pi / 3.0) * self.arrow_size,
-                              math.cos(angle + math.pi - math.pi / 3.0) * self.arrow_size)
+        arrow_head2 = QPointF(np.sin(angle + np.pi - np.pi / 3.0) * self.arrow_size,
+                              np.cos(angle + np.pi - np.pi / 3.0) * self.arrow_size)
         arrow_p2 = line.p1() + arrow_head2  # 相对坐标转换为绝对坐标
         self.arrow_head.clear()
         for point in [line.p1(), arrow_p1, arrow_p2]:
