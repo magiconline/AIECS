@@ -216,6 +216,7 @@ class DiagramItem(QGraphicsTextItem):
                 arrow.updatePosition()
             for arrow in self.out_arrows:
                 arrow.updatePosition()
+            self.parent().parent().saved = False
 
         elif change == QGraphicsItem.ItemSelectedChange:
             # item 选中状态改变
@@ -303,12 +304,9 @@ class DiagramScene(QGraphicsScene):
         if self.pointer_mode == 'line' and self.line:  # 移动line
             line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(line)
-
             self.parent().saved = False
 
-        elif self.pointer_mode == 'pointer' and self.item_text == None:  # 移动item
-            self.parent().saved = False
-            super(DiagramScene, self).mouseMoveEvent(event)
+        super(DiagramScene, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 如果当前正在连线则取消
