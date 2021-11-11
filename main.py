@@ -3,9 +3,9 @@ import os
 import sys
 from copy import deepcopy as copy
 from typing import Any, Optional
-import numpy as np
 
 import PySide6
+import numpy as np
 from PySide6.QtCore import (QPointF, QRectF, QSizeF, Qt, QLineF, )
 from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF, )
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem,
@@ -13,30 +13,12 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel, QFileDialog)
 
-import torch
-from torch.nn import *
-from torch.utils.data import DataLoader, TensorDataset
-
-from epics_get import *
-from epics_set import *
-
-
 # TODO run
 # TODO 测试新建、打开、保存、关闭功能 saved
 # TODO 测试arrow, item 移动刷新
 
 VERSION = "0.1.0"
 
-def call(kwargs: dict): 
-    s = kwargs['func'] + '('
-    for k, v in kwargs.items():
-        if k == 'func':
-            continue
-        else:
-            s = s + k + '=' + v + ','
-    s = s + ')'
-    print('call:', s)
-    return eval(s)
 
 
 class Arrow(QGraphicsLineItem):
@@ -212,6 +194,9 @@ class DiagramItem(QGraphicsTextItem):
                 edit.setValue(v)
                 edit.setDecimals(5)
 
+            elif isinstance(v, list):
+                # TODO 支持列表
+                pass
             else:
                 edit = QLineEdit(v)
                 edit.textChanged.connect(build_save(k, edit.text))
@@ -535,56 +520,39 @@ class MainWindow(QMainWindow):
         self.run_action = QAction('Run', triggered=self.run)
 
     def run(self):
-        def build(model):
-            ret = {}
-
-            for item in model['in_items']:
-                    ret.update(build(item))
-
-            if model['dtype'] == 'hyperparameters':
-                ret.update(model['kwargs'])
-            
-            elif model['dtype'] in ['optimizer', 'loss', 'data']: 
-                ret[model['name']] = call(model['kwargs'])
-            
-            elif model['dtype'] == 'model':
-                if 'model' not in ret.keys():
-                    ret['model'] = Sequential()
-                ret['model'].add_module(model['name'], call(model['kwargs']))
-
-            elif model['dtype'] == 'preprocess':
-                if model['name'] == 'cat':
-                    tensors = []
-                    for item in model['in_items']:
-                        tensors.append(ret[item['name']])
-                    ret[model['name']] = call({**model['kwargs'], 'tensors': tensors})
-                # elif model
-
-            else:
-                print('unknown dtype')
-            
-            return ret
-
-        if not self.saved:
-            self.save()
+        if not self.save():
+            print('运行失败')
+            return False
 
         with open(self.save_file_path) as f:
             js_file = json.load(f)
 
-        # TODO 生成模型
-        preprocess_model = {}
+        # 检测版本
+        if js_file['save_version'] != self.save_version:
+            print('Warning! Different save version.')
+
+        if js_file['module_version'] != self.module_version:
+            print('Warning! Different module version.')
+
+        f = None
         for model in js_file['models']:
-            preprocess_model.update(build(model))
+            if model['dtype'] == 'hyperparameters':
+                if not f:
+                    f = eval(model['kwargs']['func'])
+                else:
+                    print('Error! More than one hyperparameter model.')
+                    return False
 
+        if f == None:
+            print('Error! No hyperparameter model.')
 
-        # TODO 运行
-        pass
+        f(js_file['models'])
 
-        # TODO 输出运行结果
-        
+        print('运行成功')
+        return True
 
     def new(self):
-        if self.close() == True:
+        if self.close():
             self.save_file_path = None
             self.saved = True
             print("新建成功")
@@ -614,7 +582,7 @@ class MainWindow(QMainWindow):
             print('打开失败')
             return False
 
-        if self.close() == True:
+        if self.saved or self.close():
             # 读取文件
             with open(file_name) as f:
                 models = json.load(f)
@@ -714,22 +682,28 @@ class MainWindow(QMainWindow):
     def close(self):
         # 检测是否保存，如果未保存则提示保存
         if not self.saved:
-            choice = QMessageBox.warning(self, 'Close without saving!', 'Do you want to close without saving?', QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
-        
+            choice = QMessageBox.warning(self, 'Close without saving!', 'Do you want to close without saving?',
+                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
             if choice == QMessageBox.No:
                 if not self.save():
                     # 保存失败
                     print('关闭失败')
-                    return False 
-            
+                    return False
+
             elif choice == QMessageBox.Cancel:
                 print('关闭失败')
                 return False
-        
+
         self.init_view()
-        self.init_toolbar()
+
+        self.scene.pointer_mode = self.toolbar_button_group.checkedButton().text()
+        checked_button = self.tool_box_button_group.checkedButton()
+        if checked_button:
+            checked_button.setChecked(False)
+
         self.init_layout()
-        
+
         print('关闭成功')
         return True
 

@@ -1,10 +1,8 @@
-import torch
-import epics
-from sklearn.datasets import load_boston
 from functools import wraps
 
-# TODO: 如果使用numpy最后转为Tensor可以更好的兼容sklean功能
-# 返回floatTensor类型数据，shape: n*1
+import torch
+from sklearn.datasets import load_boston
+
 
 def tensor_wrapper(func):
     @wraps(func)

@@ -5,7 +5,7 @@
             {
                 "name": "Linear",
                 "kwargs": {
-                    "func": "Linear",
+                    "func": "torch.nn.Linear",
                     "in_features": 0,
                     "out_features": 0
                 }
@@ -13,7 +13,7 @@
             {
                 "name": "ReLU",
                 "kwargs": {
-                    "func": "ReLU"
+                    "func": "torch.nn.ReLU"
                 }
             }
         ],
@@ -21,85 +21,85 @@
             {
                 "name": "get_boston_CRIM",
                 "kwargs": {
-                    "func": "get_boston_CRIM"
+                    "func": "epics_get.get_boston_CRIM"
                 }
             },
             {
                 "name": "get_boston_ZN",
                 "kwargs": {
-                    "func": "get_boston_ZN"
+                    "func": "epics_get.get_boston_ZN"
                 }
             },
             {
                 "name": "get_boston_INDUS",
                 "kwargs": {
-                    "func": "get_boston_INDUS"
+                    "func": "epics_get.get_boston_INDUS"
                 }
             },
             {
                 "name": "get_boston_CHAS",
                 "kwargs": {
-                    "func": "get_boston_CHAS"
+                    "func": "epics_get.get_boston_CHAS"
                 }
             },
             {
                 "name": "get_boston_NOX",
                 "kwargs": {
-                    "func": "get_boston_NOX"
+                    "func": "epics_get.get_boston_NOX"
                 }
             },
             {
                 "name": "get_boston_RM",
                 "kwargs": {
-                    "func": "get_boston_RM"
+                    "func": "epics_get.get_boston_RM"
                 }
             },
             {
                 "name": "get_boston_AGE",
                 "kwargs": {
-                    "func": "get_boston_AGE"
+                    "func": "epics_get.get_boston_AGE"
                 }
             },
             {
                 "name": "get_boston_DIS",
                 "kwargs": {
-                    "func": "get_boston_DIS"
+                    "func": "epics_get.get_boston_DIS"
                 }
             },
             {
                 "name": "get_boston_RAD",
                 "kwargs": {
-                    "func": "get_boston_RAD"
+                    "func": "epics_get.get_boston_RAD"
                 }
             },
             {
                 "name": "get_boston_TAX",
                 "kwargs": {
-                    "func": "get_boston_TAX"
+                    "func": "epics_get.get_boston_TAX"
                 }
             },
             {
                 "name": "get_boston_PTRATIO",
                 "kwargs": {
-                    "func": "get_boston_PTRATIO"
+                    "func": "epics_get.get_boston_PTRATIO"
                 }
             },
             {
                 "name": "get_boston_B",
                 "kwargs": {
-                    "func": "get_boston_B"
+                    "func": "epics_get.get_boston_B"
                 }
             },
             {
                 "name": "get_boston_LSTAT",
                 "kwargs": {
-                    "func": "get_boston_LSTAT"
+                    "func": "epics_get.get_boston_LSTAT"
                 }
             },
             {
                 "name": "get_boston_PRICE",
                 "kwargs": {
-                    "func": "get_boston_PRICE"
+                    "func": "epics_get.get_boston_PRICE"
                 }
             }
         ],
@@ -107,7 +107,7 @@
             {
                 "name": "cat",
                 "kwargs": {
-                    "func": "torch.cat",
+                    "func": "cat",
                     "tensors": [],
                     "dim": 1
                 }
@@ -117,7 +117,7 @@
             {
                 "name": "MSELoss",
                 "kwargs": {
-                    "func": "MSELoss"
+                    "func": "torch.nn.MSELoss"
                 }
             }
         ],
@@ -125,7 +125,8 @@
             {
                 "name": "SGD",
                 "kwargs": {
-                    "func": "SGD",
+                    "func": "torch.optim.SGD",
+                    "params": [],
                     "lr": 0.1
                 }
             }
@@ -139,7 +140,10 @@
                     "batch_size": 1,
                     "shuffle": true,
                     "gpu": true,
-                    "seed": 1
+                    "seed": 1,
+                    "epoch_loss": true,
+                    "accuracy": false,
+                    "epoch_time": true
                 }
             }
         ]
