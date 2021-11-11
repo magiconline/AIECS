@@ -8,23 +8,6 @@ def call(kwargs: dict, **kwargs_):
     kwargs.update(kwargs_)
     f = eval(kwargs.pop('func'))
     return f(**kwargs)
-    # s = kwargs['func'] + '('
-
-    # for k, v in {**kwargs, **kwargs_}.items():
-    #     if k == 'func':
-    #         continue
-    #     else:
-    #         s = s + k + '=' + str(v) + ','
-
-    # kwdict = {**kwargs, **kwargs_}
-    # for k in kwdict.keys():
-    #     if k != 'func':
-    #         s = s + f"{k}=kwdict['{k}'],"
-    #
-    # s = s + ')'
-    # print('call:', s)
-    # return eval(s)
-
 
 def set_seed(seed):
     torch.manual_seed(seed)

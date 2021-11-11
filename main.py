@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel, QFileDialog)
 
-# TODO run
 # TODO 测试新建、打开、保存、关闭功能 saved
 # TODO 测试arrow, item 移动刷新
 
@@ -541,7 +540,7 @@ class MainWindow(QMainWindow):
                     print('Error! More than one hyperparameter model.')
                     return False
 
-        if f == None:
+        if f is None:
             print('Error! No hyperparameter model.')
 
         f(js_file['models'])

@@ -6,6 +6,23 @@
 	},
 	"models": [
 		{
+			"name": "DL_10",
+			"dtype": "hyperparameters",
+			"pos": [
+				2144.0,
+				2477.0
+			],
+			"kwargs": {
+				"func": "DL",
+				"epoch": 100,
+				"batch_size": 32,
+				"shuffle": true,
+				"gpu": true,
+				"seed": 1
+			},
+			"in_items": []
+		},
+		{
 			"name": "SGD_9",
 			"dtype": "optimizer",
 			"pos": [
@@ -138,23 +155,6 @@
 					]
 				}
 			]
-		},
-		{
-			"name": "DL_10",
-			"dtype": "hyperparameters",
-			"pos": [
-				2144.0,
-				2477.0
-			],
-			"kwargs": {
-				"func": "DL",
-				"epoch": 100,
-				"batch_size": 32,
-				"shuffle": true,
-				"gpu": true,
-				"seed": 1
-			},
-			"in_items": []
 		}
 	]
 }
