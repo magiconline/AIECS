@@ -13,11 +13,14 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphic
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel, QFileDialog)
 
+# 功能
+# TODO train, run, save/load model
+
+# BUG
 # TODO 测试新建、打开、保存、关闭功能 saved
 # TODO 测试arrow, item 移动刷新
 
 VERSION = "0.1.0"
-
 
 
 class Arrow(QGraphicsLineItem):
@@ -304,8 +307,8 @@ class DiagramScene(QGraphicsScene):
             line = QLineF(self.line.line().p1(), event.scenePos())
             self.line.setLine(line)
             self.parent().saved = False
-
-        super(DiagramScene, self).mouseMoveEvent(event)
+        elif self.pointer_mode == 'pointer':
+            super(DiagramScene, self).mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 如果当前正在连线则取消
