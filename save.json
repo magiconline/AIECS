@@ -2,15 +2,36 @@
 	"save_version": "0.1.0",
 	"module_version": "0.1.0",
 	"scene": {
-		"item_count": 12
+		"item_count": 13
 	},
 	"models": [
+		{
+			"name": "DL_12",
+			"dtype": "hyperparameters",
+			"pos": [
+				2102.0,
+				2522.0
+			],
+			"kwargs": {
+				"func": "DL",
+				"epoch": 1,
+				"batch_size": 1,
+				"shuffle": true,
+				"gpu": true,
+				"seed": 1,
+				"epoch_loss": true,
+				"accuracy": false,
+				"epoch_time": true,
+				"model_path": "save_model.pt"
+			},
+			"in_items": []
+		},
 		{
 			"name": "SGD_9",
 			"dtype": "optimizer",
 			"pos": [
-				2833.0,
-				2270.0
+				2928.0,
+				2306.0
 			],
 			"kwargs": {
 				"func": "torch.optim.SGD",
@@ -22,8 +43,8 @@
 					"name": "MSELoss_8",
 					"dtype": "loss",
 					"pos": [
-						2653.0,
-						2265.0
+						2777.0,
+						2303.0
 					],
 					"kwargs": {
 						"func": "torch.nn.MSELoss"
@@ -33,8 +54,8 @@
 							"name": "Linear_7",
 							"dtype": "model",
 							"pos": [
-								2511.0,
-								2258.0
+								2614.0,
+								2302.0
 							],
 							"kwargs": {
 								"func": "torch.nn.Linear",
@@ -46,8 +67,8 @@
 									"name": "ReLU_6",
 									"dtype": "model",
 									"pos": [
-										2412.0,
-										2253.0
+										2479.0,
+										2303.0
 									],
 									"kwargs": {
 										"func": "torch.nn.ReLU"
@@ -57,8 +78,8 @@
 											"name": "Linear_5",
 											"dtype": "model",
 											"pos": [
-												2301.0,
-												2249.0
+												2353.0,
+												2294.0
 											],
 											"kwargs": {
 												"func": "torch.nn.Linear",
@@ -70,8 +91,8 @@
 													"name": "cat_4",
 													"dtype": "preprocess",
 													"pos": [
-														2179.0,
-														2248.0
+														2242.0,
+														2275.0
 													],
 													"kwargs": {
 														"func": "cat",
@@ -83,8 +104,8 @@
 															"name": "get_boston_CRIM_0",
 															"dtype": "data",
 															"pos": [
-																1950.0,
-																2189.0
+																2025.0,
+																2223.0
 															],
 															"kwargs": {
 																"func": "epics_get.get_boston_CRIM"
@@ -95,8 +116,8 @@
 															"name": "get_boston_ZN_1",
 															"dtype": "data",
 															"pos": [
-																1977.0,
-																2234.0
+																2036.0,
+																2263.0
 															],
 															"kwargs": {
 																"func": "epics_get.get_boston_ZN"
@@ -107,8 +128,8 @@
 															"name": "get_boston_INDUS_2",
 															"dtype": "data",
 															"pos": [
-																1998.0,
-																2287.0
+																2036.0,
+																2311.0
 															],
 															"kwargs": {
 																"func": "epics_get.get_boston_INDUS"
@@ -127,8 +148,8 @@
 							"name": "get_boston_PRICE_3",
 							"dtype": "data",
 							"pos": [
-								2682.0,
-								2497.0
+								2597.0,
+								2482.0
 							],
 							"kwargs": {
 								"func": "epics_get.get_boston_PRICE"
@@ -138,26 +159,6 @@
 					]
 				}
 			]
-		},
-		{
-			"name": "DL_10",
-			"dtype": "hyperparameters",
-			"pos": [
-				2105.0,
-				2705.0
-			],
-			"kwargs": {
-				"func": "DL",
-				"epoch": 10,
-				"batch_size": 32,
-				"shuffle": true,
-				"gpu": true,
-				"seed": 1,
-				"epoch_loss": true,
-				"accuracy": false,
-				"epoch_time": true
-			},
-			"in_items": []
 		}
 	]
 }

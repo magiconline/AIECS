@@ -143,7 +143,8 @@
                     "seed": 1,
                     "epoch_loss": true,
                     "accuracy": false,
-                    "epoch_time": true
+                    "epoch_time": true,
+                    "model_path": ""
                 }
             }
         ]

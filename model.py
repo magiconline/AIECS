@@ -1,13 +1,16 @@
 import time
+
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-import epics_set
-import epics_get
+
+
+# TODO 显示loss accuracy epoch batch
 
 def call(kwargs: dict, **kwargs_):
     kwargs.update(kwargs_)
     f = eval(kwargs.pop('func'))
     return f(**kwargs)
+
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -65,8 +68,10 @@ def DL(*args, **kwargs):
     SHUFFLE = hyperparameters_model['kwargs']['shuffle']
     GPU = hyperparameters_model['kwargs']['gpu']
     SEED = hyperparameters_model['kwargs']['seed']
+    MODEL_PATH = hyperparameters_model['kwargs']['model_path']
     set_seed(SEED)
     device = set_device(GPU)
+
 
     # build model
     if len(optimizer_model['in_items']) == 1 and optimizer_model['in_items'][0]['dtype'] == 'loss':
@@ -93,17 +98,10 @@ def DL(*args, **kwargs):
     dataset = TensorDataset(x_true.to(device), y_true.to(device))
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=SHUFFLE)
 
-    # run model
-    # if hyperparameters_model['kwargs']['epoch_loss']:
-    #     epoch_loss = []
-    # if hyperparameters_model['kwargs']['accuracy']:
-    #     accuracy = []
-    # if hyperparameters_model['kwargs']['epoch_time']:
-    #     epoch_time = []
-
     for epoch in range(EPOCH):
         tic = time.time()
         total_loss = 0
+        net.train()
 
         for x_train, y_train in dataloader:
             y_pred = net(x_train)
@@ -119,4 +117,5 @@ def DL(*args, **kwargs):
         print(f"epoch: {epoch}, loss: {total_loss}, time used: {toc - tic}")
 
     # result
+    torch.save(net.state_dict(), MODEL_PATH)
     print('训练完成')
