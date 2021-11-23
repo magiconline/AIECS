@@ -2,7 +2,8 @@ import time
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-
+import epics_set
+import epics_get
 
 # TODO 显示loss accuracy epoch batch
 
