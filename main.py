@@ -5,11 +5,11 @@ from copy import deepcopy as copy
 from typing import Any, Optional
 from model import *
 
-import PySide6
+import PyQt5
 import numpy as np
-from PySide6.QtCore import (QPointF, QRectF, QSizeF, Qt, QLineF, )
-from PySide6.QtGui import (QAction, QIcon, QPen, QPolygonF, )
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem,
+from PyQt5.QtCore import (QPointF, QRectF, QSizeF, Qt, QLineF, )
+from PyQt5.QtGui import (QAction, QIcon, QPen, QPolygonF, )
+from PyQt5.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGraphicsItem, QGraphicsLineItem,
                                QGraphicsTextItem, QLineEdit, QMainWindow, QMessageBox, QSpinBox,
                                QToolBox, QHBoxLayout, QGraphicsView, QGraphicsScene, QWidget, QToolButton, QComboBox,
                                QFormLayout, QButtonGroup, QVBoxLayout, QLabel, QFileDialog)
@@ -36,7 +36,7 @@ class Arrow(QGraphicsLineItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setPen(QPen(Qt.black, 2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
 
-    def boundingRect(self) -> PySide6.QtCore.QRectF:
+    def boundingRect(self) -> PyQt5.QtCore.QRectF:
         # 由于箭头比直线大，重新计算graphics scene 需要刷新的范围
         extra = (self.pen().width() + self.arrow_size) / 2
         p1 = self.line().p1()
@@ -44,7 +44,7 @@ class Arrow(QGraphicsLineItem):
         rect = QRectF(p1, QSizeF(p2.x() - p1.x(), p2.y() - p1.y()))
         return rect.normalized().adjusted(-extra, -extra, extra, extra)
 
-    def shape(self) -> PySide6.QtGui.QPainterPath:
+    def shape(self) -> PyQt5.QtGui.QPainterPath:
         # 用于检查鼠标碰撞和选择
         path = super().shape()
         path.addPolygon(self.arrow_head)
@@ -56,8 +56,8 @@ class Arrow(QGraphicsLineItem):
         end = self.mapFromItem(self.end_item, self.end_item.width() / 2, self.end_item.height() / 2)
         self.setLine(QLineF(start, end))
 
-    def paint(self, painter: PySide6.QtGui.QPainter, option: PySide6.QtWidgets.QStyleOptionGraphicsItem,
-              widget: Optional[PySide6.QtWidgets.QWidget] = ...) -> None:
+    def paint(self, painter: PyQt5.QtGui.QPainter, option: PyQt5.QtWidgets.QStyleOptionGraphicsItem,
+              widget: Optional[PyQt5.QtWidgets.QWidget] = ...) -> None:
         # 绘制直线和箭头
 
         # pen 绘制轮廓，brush 填充
@@ -212,7 +212,7 @@ class DiagramItem(QGraphicsTextItem):
         while property_layout.rowCount() > 0:
             property_layout.removeRow(0)
 
-    def itemChange(self, change: PySide6.QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+    def itemChange(self, change: PyQt5.QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange:
             # item 被移动
             for arrow in self.in_arrows:
@@ -274,7 +274,7 @@ class DiagramScene(QGraphicsScene):
         self.setParent(parent)
         self.item_count = 0
 
-    def mousePressEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mousePressEvent(self, event: PyQt5.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         if event.button() != Qt.LeftButton:  # 只响应左键
             return
 
@@ -302,7 +302,7 @@ class DiagramScene(QGraphicsScene):
 
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mouseMoveEvent(self, event: PyQt5.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 移动item 或者 移动line 或者无动作
         if self.pointer_mode == 'line' and self.line:  # 移动line
             line = QLineF(self.line.line().p1(), event.scenePos())
@@ -311,7 +311,7 @@ class DiagramScene(QGraphicsScene):
         elif self.pointer_mode == 'pointer':
             super(DiagramScene, self).mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event: PySide6.QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mouseReleaseEvent(self, event: PyQt5.QtWidgets.QGraphicsSceneMouseEvent) -> None:
         # 如果当前正在连线则取消
         if self.line:
             # 获得line起点与终点的第一个不是line的item
