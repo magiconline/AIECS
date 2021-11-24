@@ -3,7 +3,7 @@ import os
 import sys
 from copy import deepcopy as copy
 from typing import Any, Optional
-from model import *
+from src.model import *
 
 import PySide2
 import numpy as np
